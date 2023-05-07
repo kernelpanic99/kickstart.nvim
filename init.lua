@@ -71,7 +71,12 @@ require('lazy').setup({
 
   -- Git related plugins
   'kdheepak/lazygit.nvim',
+  'ryanoasis/vim-devicons',
 
+  'christoomey/vim-tmux-navigator',
+
+  -- File explorer
+  'nvim-tree/nvim-tree.lua',
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
