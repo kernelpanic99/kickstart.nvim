@@ -71,15 +71,24 @@ require('lazy').setup({
 
   -- Git related plugins
   'kdheepak/lazygit.nvim',
-  'ryanoasis/vim-devicons',
+  "nvim-tree/nvim-web-devicons",
 
   'christoomey/vim-tmux-navigator',
 
   -- File explorer
   'nvim-tree/nvim-tree.lua',
 
+  'github/copilot.vim',
+
+  -- Colorschemes
+  { 'catppuccin/nvim',       name = 'catppuccin' },
+  {'ellisonleao/gruvbox.nvim'},
+
+  -- MArkdown
+  { "ellisonleao/glow.nvim", config = true,      cmd = "Glow" },
+
   -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  -- 'tpope/vim-sleuth',
   'ThePrimeagen/harpoon',
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -101,13 +110,28 @@ require('lazy').setup({
   },
 
   {
+    "folke/todo-comments.nvim",
+    requires = "nvim-lua/plenary.nvim",
+    config = function()
+      require("todo-comments").setup {}
+    end
+  },
+
+  {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',          opts = {} },
+  {
+    'folke/which-key.nvim',
+    opts = {
+      icons = {
+        separator = '',
+      }
+    }
+  },
   {
     -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -123,6 +147,12 @@ require('lazy').setup({
     },
   },
 
+  -- Kill unused buffers
+  {
+    "chrisgrieser/nvim-early-retirement",
+    config = true,
+    event = "VeryLazy",
+  },
   -- {
   --   -- Theme inspired by Atom
   --   'navarasu/onedark.nvim',
@@ -131,12 +161,7 @@ require('lazy').setup({
   --     vim.cmd.colorscheme 'onedark'
   --   end,
   -- },
-  {
-    "EdenEast/nightfox.nvim",
-    config = function()
-      vim.cmd('colorscheme nightfox')
-    end
-  },
+  { "EdenEast/nightfox.nvim"},
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -144,22 +169,23 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        component_separators = '|',
-        section_separators = '',
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
       },
     },
   },
+  'ledger/vim-ledger',
 
-  {
-    -- Add indentation guides even on blank lines
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
-  },
+  -- {
+  --   -- Add indentation guides even on blank lines
+  --   'lukas-reineke/indent-blankline.nvim',
+  --   -- Enable `lukas-reineke/indent-blankline.nvim`
+  --   -- See `:help indent_blankline.txt`
+  --   opts = {
+  --     char = '|',
+  --     show_trailing_blankline_indent = false,
+  --   },
+  -- },
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim',         opts = {} },
@@ -211,8 +237,6 @@ require('lazy').setup({
   { import = 'custom.plugins' },
 }, {})
 
-require("nvim-tree").setup()
-
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
@@ -244,12 +268,18 @@ vim.o.smartcase = true
 vim.wo.signcolumn = 'yes'
 
 -- Decrease update time
-vim.o.updatetime = 250
+vim.o.updatetime = 100
 vim.o.timeout = true
 vim.o.timeoutlen = 300
 
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.smarttab = true
+vim.opt.expandtab = true
+
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
+vim.cmd('colorscheme catppuccin-frappe')
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
@@ -471,6 +501,16 @@ mason_lspconfig.setup_handlers {
 }
 
 require('nvim-tree').setup({
+  renderer = {
+    icons = {
+      glyphs = {
+        git = {
+          unstaged = "-"
+        }
+      }
+    }
+  },
+
   filters = {
     dotfiles = false,
   },
@@ -479,7 +519,7 @@ require('nvim-tree').setup({
   }
 })
 
-vim.keymap.set('n', '<Leader>e', ':NvimTreeToggle<CR>', { silent = true })
+vim.keymap.set('n', '<A-e>', ':NvimTreeToggle<CR>', { silent = true })
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
@@ -528,13 +568,29 @@ vim.keymap.set('n', '<A-2>', go_file(2))
 vim.keymap.set('n', '<A-3>', go_file(3))
 vim.keymap.set('n', '<A-4>', go_file(4))
 vim.keymap.set('n', '<A-5>', go_file(5))
-vim.keymap.set('n', '<Leader>hu', ui.toggle_quick_menu)
-vim.keymap.set('n', '<Leader>hc', mark.clear_all)
-
+vim.keymap.set('n', '<Leader>hu', ui.toggle_quick_menu, {
+  desc = 'Show Harpoon menu',
+})
+vim.keymap.set('n', '<Leader>hc', function()
+  mark.clear_all()
+  print('Harpoon cleared')
+end, {
+  desc = 'Clear Harpoon marks'
+})
 
 -- LazyGit
-vim.keymap.set('n', '<Leader>gg', ':LazyGit<CR>')
-vim.keymap.set('n', '<Leader>ff', ':Format<CR>')
+vim.keymap.set('n', '<Leader>gg', ':LazyGit<CR>', {
+  desc = 'Open LazyGit',
+})
+
+vim.keymap.set('n', '<Leader>ff', ':Format<CR>', {
+  desc = 'Format file with lsp',
+})
+
+vim.keymap.set('n', '<C-d>', '<C-d>zz')
+vim.keymap.set('n', '<C-u>', '<C-u>zz')
+vim.keymap.set('n', 'x', '"_x')
+vim.keymap.set('n', 'c', '"_c')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
